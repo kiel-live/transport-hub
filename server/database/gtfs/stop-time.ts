@@ -1,7 +1,7 @@
 import { pgTable, text, interval, integer, real, primaryKey } from 'drizzle-orm/pg-core';
 import { gtfsStop } from './stop';
 import { gtfsTrip } from './trip';
-import { Model } from '~/server/importer/types';
+import { Model } from '~/importer/types';
 
 export const gtfsStopTime = pgTable(
   'gtfs_stop_times',

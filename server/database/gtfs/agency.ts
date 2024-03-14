@@ -1,5 +1,5 @@
 import { pgTable, text } from 'drizzle-orm/pg-core';
-import { Model } from '~/server/importer/types';
+import { Model } from '~/importer/types';
 
 export const gtfsAgency = pgTable('gtfs_agencies', {
   agencyId: text('agency_id').notNull().primaryKey(),

@@ -12,6 +12,12 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    dbUrl: '',
+    dbUrl: 'postgres://postgres:postgres@localhost:5432',
   },
+  nitro: {
+    experimental: {
+      tasks: true,
+    },
+  },
+  ignore: ['**/*/postgres-data'],
 });

@@ -1,13 +1,13 @@
-import { pgTable, text, integer, json, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, json, timestamp, boolean, serial } from 'drizzle-orm/pg-core';
 
 export const feeds = pgTable('feeds', {
-  id: integer('id').primaryKey(),
+  id: serial('id').primaryKey(),
   importId: text('import_id').notNull().unique(),
   type: text('type', { enum: ['gtfs', 'gtfs-rt', 'gbfs'] }).notNull(),
   name: text('name').notNull(),
   url: text('url').notNull(),
   headers: json('headers').$type<{ [key: string]: string }>(),
-  lastFetchedAt: timestamp('last_fetched_at'),
+  lastUpdated: timestamp('last_updated'),
   contact: json('contact').$type<{
     name: string;
     email?: string;
@@ -17,11 +17,12 @@ export const feeds = pgTable('feeds', {
     url: string;
     maintainers: string[];
   }>(),
+  disabled: boolean('disabled').notNull().default(false),
   createdAt: timestamp('created_at').notNull(),
 });
 
 export const feedLogs = pgTable('feed_errors', {
-  id: integer('id').primaryKey(),
+  id: serial('id').primaryKey(),
   feedId: integer('feed_id')
     .notNull()
     .references(() => feeds.id),
@@ -31,3 +32,5 @@ export const feedLogs = pgTable('feed_errors', {
 });
 
 export * from './gtfs';
+export * from './gbfs';
+// export * from './gtfs-rt';

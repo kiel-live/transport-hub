@@ -1,4 +1,4 @@
-type LogFunction = (...text: unknown[]) => void;
+type LogFunction = (...args: unknown[]) => void;
 type Task = (o: { log: LogFunction }) => Promise<void>;
 
 export function defineBatchTask(task: Task) {

@@ -1,6 +1,6 @@
 import { date, integer, pgTable, primaryKey, text } from 'drizzle-orm/pg-core';
 import { gtfsCalendar } from './calendar';
-import { Model } from '~/server/importer/types';
+import { Model } from '~/importer/types';
 
 export const gtfsCalendarDate = pgTable(
   'gtfs_calendar_dates',

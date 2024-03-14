@@ -1,11 +1,11 @@
 import parseTime from 'gtfs-utils/parse-time.js';
 
-type GenericValue = string | null | undefined;
+type GenericValue = string | number | boolean | null | undefined;
 type GenericObject<T = GenericValue> = { [key: string]: T };
 type MakeDataProviders<T extends GenericObject> = {
   _data: T;
   _required: boolean;
-  _value: string | number | null | undefined | { latitude: number; longitude: number } | boolean;
+  _value: string | number | null | undefined | { latitude: number; longitude: number } | boolean | Date;
 };
 type Replace<T, K extends keyof T, V> = Omit<T, K> & { [P in K]: V };
 
@@ -57,31 +57,39 @@ export class DataProvider<U extends GenericObject, T extends MakeDataProviders<U
   }
 
   integer(key: keyof U): DataProvider<U, Replace<T, '_value', number>> {
-    const value = this._data[key] ?? null;
+    const rawValue = this._data[key] ?? null;
+    let value: null | number = null;
+    if (rawValue !== null && typeof rawValue === 'string' && rawValue.length > 0) {
+      value = parseInt(rawValue);
+    } else if (rawValue !== null && typeof rawValue === 'number') {
+      value = rawValue;
+    }
     return new DataProvider<U, Replace<T, '_value', number>>({
       ...this,
       _key: key,
-      _value: value !== null && value.length > 0 ? parseInt(value) : null,
+      _value: value,
     });
   }
 
   float(key: keyof U): DataProvider<U, Replace<T, '_value', number>> {
-    const value = this._data[key] ?? null;
-    if (value !== null && !value?.match(/^-?\d+(\.\d+)?$/)) {
-      throw new Error(`Invalid float value for key ${key.toString()}: ${value}`);
+    const rawValue = this._data[key] ?? null;
+    let value: null | number = null;
+    if (rawValue !== null && typeof rawValue === 'string' && rawValue.length > 0) {
+      value = parseFloat(rawValue);
+    } else if (rawValue !== null && typeof rawValue === 'number') {
+      value = rawValue;
     }
-
     return new DataProvider<U, Replace<T, '_value', number>>({
       ...this,
       _key: key,
-      _value: value !== null && value.length > 0 ? parseFloat(value) : null,
+      _value: value,
     });
   }
 
   time(key: keyof U): DataProvider<U, Replace<T, '_value', string>> {
     const value = this._data[key] ?? null;
     let time: string | null = null;
-    if (value !== null) {
+    if (value !== null && typeof value === 'string') {
       const { hours: h, minutes: m, seconds: s } = parseTime(value);
       time = `${h} hours ${m} minutes ${s === null ? 0 : s} seconds`;
     }
@@ -96,13 +104,13 @@ export class DataProvider<U extends GenericObject, T extends MakeDataProviders<U
     lonKey: keyof U,
     latKey: keyof U,
   ): DataProvider<U, Replace<T, '_value', { latitude: number; longitude: number }>> {
-    const lon = this._data[lonKey];
-    const lat = this._data[latKey];
+    const lon = this.float(lonKey).get();
+    const lat = this.float(latKey).get();
     let value: { latitude: number; longitude: number } | null = null;
     if (lon && lat) {
       value = {
-        latitude: parseFloat(lat),
-        longitude: parseFloat(lon),
+        latitude: lat,
+        longitude: lon,
       };
     }
     return new DataProvider<U, Replace<T, '_value', { latitude: number; longitude: number }>>({
@@ -118,6 +126,24 @@ export class DataProvider<U extends GenericObject, T extends MakeDataProviders<U
       ...this,
       _key: key,
       _value: value === 'true',
+    });
+  }
+
+  date(
+    key: keyof U,
+    options: { timestampUnit: 'ms' | 's' } = { timestampUnit: 's' },
+  ): DataProvider<U, Replace<T, '_value', Date>> {
+    const value = this._data[key] ?? null;
+    let date: Date | null = null;
+    if (value !== null && typeof value === 'string') {
+      date = new Date(value);
+    } else if (typeof value === 'number') {
+      date = new Date(value * (options?.timestampUnit === 's' ? 1000 : 1));
+    }
+    return new DataProvider<U, Replace<T, '_value', Date>>({
+      ...this,
+      _key: key,
+      _value: date,
     });
   }
 

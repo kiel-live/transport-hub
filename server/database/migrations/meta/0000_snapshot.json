@@ -1,5 +1,5 @@
 {
-  "id": "c4004b84-fd26-492a-989b-847aa3cbd55f",
+  "id": "8379813d-5781-4163-a172-2d529ee9dce9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -10,7 +10,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -64,7 +64,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -98,8 +98,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "last_fetched_at": {
-          "name": "last_fetched_at",
+        "last_updated": {
+          "name": "last_updated",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
@@ -115,6 +115,13 @@
           "type": "json",
           "primaryKey": false,
           "notNull": false
+        },
+        "disabled": {
+          "name": "disabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "created_at": {
           "name": "created_at",
@@ -288,22 +295,16 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "gtfs_calendar_dates_service_id_gtfs_calendar_service_id_fk": {
-          "name": "gtfs_calendar_dates_service_id_gtfs_calendar_service_id_fk",
-          "tableFrom": "gtfs_calendar_dates",
-          "tableTo": "gtfs_calendar",
-          "columnsFrom": [
-            "service_id"
-          ],
-          "columnsTo": [
-            "service_id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "pk": {
+          "name": "pk",
+          "columns": [
+            "service_id",
+            "date"
+          ]
         }
       },
-      "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "gtfs_routes": {
@@ -524,7 +525,16 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "gtfs_stop_times_trip_id_stop_id_stop_sequence_pk": {
+          "name": "gtfs_stop_times_trip_id_stop_id_stop_sequence_pk",
+          "columns": [
+            "trip_id",
+            "stop_id",
+            "stop_sequence"
+          ]
+        }
+      },
       "uniqueConstraints": {}
     },
     "gtfs_stops": {
@@ -619,6 +629,12 @@
       "name": "trips",
       "schema": "",
       "columns": {
+        "trip_id": {
+          "name": "trip_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
         "route_id": {
           "name": "route_id",
           "type": "text",
@@ -629,12 +645,6 @@
           "name": "service_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
-        },
-        "trip_id": {
-          "name": "trip_id",
-          "type": "text",
-          "primaryKey": true,
           "notNull": true
         },
         "trip_headsign": {
@@ -695,19 +705,6 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "trips_service_id_gtfs_calendar_service_id_fk": {
-          "name": "trips_service_id_gtfs_calendar_service_id_fk",
-          "tableFrom": "trips",
-          "tableTo": "gtfs_calendar",
-          "columnsFrom": [
-            "service_id"
-          ],
-          "columnsTo": [
-            "service_id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "trips_shape_id_gtfs_shapes_shape_id_fk": {
           "name": "trips_shape_id_gtfs_shapes_shape_id_fk",
           "tableFrom": "trips",
@@ -722,6 +719,224 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "gbfs_station_information": {
+      "name": "gbfs_station_information",
+      "schema": "",
+      "columns": {
+        "station_id": {
+          "name": "station_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "short_name": {
+          "name": "short_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "geography(POINT,4326)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "region_id": {
+          "name": "region_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rental_uri_android": {
+          "name": "rental_uri_android",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rental_uri_ios": {
+          "name": "rental_uri_ios",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rental_uri_web": {
+          "name": "rental_uri_web",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity": {
+          "name": "capacity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_virtual": {
+          "name": "is_virtual",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated": {
+          "name": "last_updated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "gbfs_system_information": {
+      "name": "gbfs_system_information",
+      "schema": "",
+      "columns": {
+        "system_id": {
+          "name": "system_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "language": {
+          "name": "language",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "short_name": {
+          "name": "short_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operator": {
+          "name": "operator",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "purchase_url": {
+          "name": "purchase_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "feed_contact_email": {
+          "name": "feed_contact_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "license_url": {
+          "name": "license_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "terms_url": {
+          "name": "terms_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "terms_last_updated": {
+          "name": "terms_last_updated",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "privacy_url": {
+          "name": "privacy_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "privacy_last_updated": {
+          "name": "privacy_last_updated",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rental_apps_android_discovery_url": {
+          "name": "rental_apps_android_discovery_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rental_apps_android_store_url": {
+          "name": "rental_apps_android_store_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rental_apps_ios_discovery_url": {
+          "name": "rental_apps_ios_discovery_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rental_apps_ios_store_url": {
+          "name": "rental_apps_ios_store_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated": {
+          "name": "last_updated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     }

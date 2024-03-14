@@ -5,9 +5,9 @@ import { createWriteStream } from 'node:fs';
 import path from 'node:path';
 import extractZip from 'extract-zip';
 
-import { insertRows, Database } from './db';
-import type { Model } from './types';
-import { PgTableWithColumns } from 'drizzle-orm/pg-core';
+import { insertRows, type Database } from './db';
+import type { Log, Model } from './types';
+import type { PgTableWithColumns } from 'drizzle-orm/pg-core';
 
 interface AsyncIterable<T = any> {
   [Symbol.asyncIterator](): AsyncIterator<T>;
@@ -22,9 +22,15 @@ interface IteratorResult<T> {
   done?: boolean;
 }
 
-export abstract class Importer {
+export abstract class BasicImporter {
   log = console.log;
+  db: Database;
   insertRowsLimit: number = 1_000;
+
+  constructor(o: { log: Log; db: Database }) {
+    this.log = o.log;
+    this.db = o.db;
+  }
 
   async downloadFile(url: string, filename: string, headers?: { [key: string]: string }) {
     if (await fs.stat(filename).catch(() => null)) {
@@ -62,7 +68,7 @@ export abstract class Importer {
   async importModel<
     T extends PgTableWithColumns<any>,
     U extends AsyncIterable<Record<string, string | null | undefined>>,
-  >(stream: U, model: Model<T>, db: Database) {
+  >(stream: U, model: Model<T>) {
     this.log('Importing', model.name, '...');
     console.time(`import ${model.name}`);
 
@@ -71,7 +77,7 @@ export abstract class Importer {
     for await (const row of stream) {
       rows.push(row);
       if (rows.length >= this.insertRowsLimit) {
-        await insertRows(db, rows, model);
+        await insertRows(this.db, rows, model);
         importedRows += rows.length;
         rows = [];
       }
@@ -81,7 +87,7 @@ export abstract class Importer {
     }
 
     // insert remaining rows
-    await insertRows(db, rows, model);
+    await insertRows(this.db, rows, model);
     importedRows += rows.length;
     this.log('Imported', importedRows, 'rows');
 

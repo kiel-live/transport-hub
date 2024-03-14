@@ -4,9 +4,8 @@ import fs from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
 import path from 'node:path';
 
-import { openDatabase, Database, closeDatabase } from './db';
 import type { Model } from './types';
-import { PgTableWithColumns } from 'drizzle-orm/pg-core';
+import type { PgTableWithColumns } from 'drizzle-orm/pg-core';
 import {
   gtfsAgencyModel,
   gtfsCalendarModel,
@@ -16,23 +15,23 @@ import {
   gtfsStopModel,
   gtfsTripModel,
   gtfsStopTimeModel,
-} from '../database/gtfs';
-import { Importer } from './importer';
+} from '~/server/database/gtfs';
+import { BasicImporter } from './importer';
 
-class GtfsImporter extends Importer {
+export class GtfsImporter extends BasicImporter {
   // models array is sorted by foreign key dependencies
   models = [
     gtfsAgencyModel,
     gtfsCalendarModel,
     gtfsCalendarDateModel,
-    // gtfsRouteModel,
+    gtfsRouteModel,
     gtfsShapeModel,
-    // gtfsStopModel,
-    // gtfsTripModel,
-    // gtfsStopTimeModel,
+    gtfsStopModel,
+    gtfsTripModel,
+    gtfsStopTimeModel,
   ];
 
-  async importGtfsFile<T extends PgTableWithColumns<any>>(csvPath: string, model: Model<T>, db: Database) {
+  async importGtfsFile<T extends PgTableWithColumns<any>>(csvPath: string, model: Model<T>) {
     const parser = createReadStream(csvPath)
       .pipe(stripBom())
       .pipe(
@@ -44,42 +43,29 @@ class GtfsImporter extends Importer {
         }),
       );
 
-    await this.importModel(parser, model, db);
+    await this.importModel(parser, model);
   }
 
-  async run({ gtfsFilename, gtfsUrl, db }: { gtfsUrl?: string; gtfsFilename: string; db: Database }) {
+  async run(feed: Feed) {
+    const gtfsUrl = feed.url;
+    const base = path.join(process.cwd(), 'catalogs', 'downloaded'); // TODO: extract somewhere
+    const gtfsFilename = path.join(base, `${feed.name}.zip`);
+
     if (gtfsUrl) {
       await this.downloadFile(gtfsUrl, gtfsFilename);
     }
 
-    // await this.unzipFile(gtfsFilename);
+    await this.unzipFile(gtfsFilename);
 
     const gtfsFolder = path.join(path.dirname(gtfsFilename), path.basename(gtfsFilename, '.zip'));
     for await (const model of this.models) {
       const csvPath = path.join(gtfsFolder, `${model.name}.txt`);
       this.log('importing ', model.name, 'from', csvPath, '...');
       if (await fs.stat(csvPath).catch(() => null)) {
-        await this.importGtfsFile(csvPath, model, db);
+        await this.importGtfsFile(csvPath, model);
       }
     }
 
     this.log('Done');
   }
 }
-
-async function main() {
-  const base = path.join(process.cwd(), 'catalogs', 'downloaded');
-
-  const db = await openDatabase();
-
-  const importer = new GtfsImporter();
-  await importer.run({
-    gtfsUrl: 'https://download.gtfs.de/germany/nv_free/latest.zip',
-    gtfsFilename: path.join(base, 'gtfs-de.zip'),
-    db,
-  });
-
-  await closeDatabase();
-}
-
-main();

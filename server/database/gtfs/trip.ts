@@ -2,7 +2,7 @@ import { pgTable, text, integer } from 'drizzle-orm/pg-core';
 import { gtfsRoute } from './route';
 import { gtfsShape } from './shape';
 import { gtfsCalendar } from './calendar';
-import { Model } from '~/server/importer/types';
+import { Model } from '~/importer/types';
 
 export const gtfsTrip = pgTable('trips', {
   tripId: text('trip_id').notNull().primaryKey(),

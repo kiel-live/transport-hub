@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS "feed_errors" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"feed_id" integer NOT NULL,
 	"task" text NOT NULL,
 	"logs" json NOT NULL,
@@ -7,15 +7,16 @@ CREATE TABLE IF NOT EXISTS "feed_errors" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "feeds" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" serial PRIMARY KEY NOT NULL,
 	"import_id" text NOT NULL,
 	"type" text NOT NULL,
 	"name" text NOT NULL,
 	"url" text NOT NULL,
 	"headers" json,
-	"last_fetched_at" timestamp,
+	"last_updated" timestamp,
 	"contact" json,
 	"origin" json,
+	"disabled" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp NOT NULL,
 	CONSTRAINT "feeds_import_id_unique" UNIQUE("import_id")
 );
@@ -47,7 +48,8 @@ CREATE TABLE IF NOT EXISTS "gtfs_calendar" (
 CREATE TABLE IF NOT EXISTS "gtfs_calendar_dates" (
 	"service_id" text NOT NULL,
 	"date" date NOT NULL,
-	"exception_type" integer NOT NULL
+	"exception_type" integer NOT NULL,
+	CONSTRAINT "pk" PRIMARY KEY("service_id","date")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "gtfs_routes" (
@@ -81,7 +83,8 @@ CREATE TABLE IF NOT EXISTS "gtfs_stop_times" (
 	"pickup_type" integer,
 	"drop_off_type" integer,
 	"shape_dist_traveled" real,
-	"timepoint" integer
+	"timepoint" integer,
+	CONSTRAINT "gtfs_stop_times_trip_id_stop_id_stop_sequence_pk" PRIMARY KEY("trip_id","stop_id","stop_sequence")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "gtfs_stops" (
@@ -101,9 +104,9 @@ CREATE TABLE IF NOT EXISTS "gtfs_stops" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "trips" (
+	"trip_id" text PRIMARY KEY NOT NULL,
 	"route_id" text NOT NULL,
 	"service_id" text NOT NULL,
-	"trip_id" text PRIMARY KEY NOT NULL,
 	"trip_headsign" text,
 	"trip_short_name" text,
 	"direction_id" integer,
@@ -113,14 +116,47 @@ CREATE TABLE IF NOT EXISTS "trips" (
 	"bikes_allowed" integer
 );
 --> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "feed_errors" ADD CONSTRAINT "feed_errors_feed_id_feeds_id_fk" FOREIGN KEY ("feed_id") REFERENCES "feeds"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
+CREATE TABLE IF NOT EXISTS "gbfs_station_information" (
+	"station_id" text PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"short_name" text,
+	"location" geography(POINT,4326) NOT NULL,
+	"region_id" text,
+	"rental_uri_android" text,
+	"rental_uri_ios" text,
+	"rental_uri_web" text,
+	"capacity" integer,
+	"is_virtual" boolean,
+	"last_updated" timestamp NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "gbfs_system_information" (
+	"system_id" text PRIMARY KEY NOT NULL,
+	"language" text NOT NULL,
+	"name" text NOT NULL,
+	"short_name" text,
+	"operator" text,
+	"url" text,
+	"purchase_url" text,
+	"start_date" date,
+	"phone_number" text,
+	"email" text,
+	"feed_contact_email" text,
+	"timezone" text NOT NULL,
+	"license_url" text,
+	"terms_url" text,
+	"terms_last_updated" date,
+	"privacy_url" text,
+	"privacy_last_updated" date,
+	"rental_apps_android_discovery_url" text,
+	"rental_apps_android_store_url" text,
+	"rental_apps_ios_discovery_url" text,
+	"rental_apps_ios_store_url" text,
+	"last_updated" timestamp NOT NULL
+);
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "gtfs_calendar_dates" ADD CONSTRAINT "gtfs_calendar_dates_service_id_gtfs_calendar_service_id_fk" FOREIGN KEY ("service_id") REFERENCES "gtfs_calendar"("service_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "feed_errors" ADD CONSTRAINT "feed_errors_feed_id_feeds_id_fk" FOREIGN KEY ("feed_id") REFERENCES "feeds"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -145,12 +181,6 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "trips" ADD CONSTRAINT "trips_route_id_gtfs_routes_route_id_fk" FOREIGN KEY ("route_id") REFERENCES "gtfs_routes"("route_id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "trips" ADD CONSTRAINT "trips_service_id_gtfs_calendar_service_id_fk" FOREIGN KEY ("service_id") REFERENCES "gtfs_calendar"("service_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

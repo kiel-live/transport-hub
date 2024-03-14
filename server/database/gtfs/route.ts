@@ -1,6 +1,6 @@
 import { integer, pgTable, text } from 'drizzle-orm/pg-core';
 import { gtfsAgency } from './agency';
-import { Model } from '~/server/importer/types';
+import { Model } from '~/importer/types';
 
 export const gtfsRoute = pgTable('gtfs_routes', {
   routeId: text('route_id').notNull().primaryKey(),

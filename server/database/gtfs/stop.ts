@@ -1,6 +1,6 @@
 import { integer, pgTable, text } from 'drizzle-orm/pg-core';
 import { point } from '../point';
-import { Model } from '~/server/importer/types';
+import { Model } from '~/importer/types';
 
 export const gtfsStop = pgTable('gtfs_stops', {
   stopId: text('stop_id').notNull().primaryKey(),

@@ -1,5 +1,5 @@
 import { integer, pgTable, real, text } from 'drizzle-orm/pg-core';
-import { Model } from '~/server/importer/types';
+import { Model } from '~/importer/types';
 import { point } from '../point';
 
 export const gtfsShape = pgTable('gtfs_shapes', {

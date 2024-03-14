@@ -1,5 +1,5 @@
 import { date, integer, pgTable, text } from 'drizzle-orm/pg-core';
-import { Model } from '~/server/importer/types';
+import { Model } from '~/importer/types';
 
 export const gtfsCalendar = pgTable('gtfs_calendar', {
   serviceId: text('service_id').notNull().primaryKey(),

@@ -1,1 +1,0 @@
-ALTER TABLE "gtfs_calendar_dates" ADD CONSTRAINT "pk" PRIMARY KEY("service_id","date");

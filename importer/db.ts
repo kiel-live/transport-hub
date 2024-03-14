@@ -1,30 +1,9 @@
-import * as schema from '../database/schema';
-import postgres from 'postgres';
-import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { PgInsertValue, PgTable, PgTableWithColumns, PgUpdateSetSource } from 'drizzle-orm/pg-core';
-import { Model } from './types';
+import * as schema from '../server/database/schema';
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { type PgInsertValue, PgTable, type PgTableWithColumns, type PgUpdateSetSource } from 'drizzle-orm/pg-core';
+import type { Model } from './types';
 import { Column, sql } from 'drizzle-orm';
 import { DataProvider } from './data-provider';
-
-let db: postgres.Sql;
-
-export async function openDatabase() {
-  // TODO: use nuxt config
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error('DATABASE_URL is not set');
-  }
-
-  db = postgres(databaseUrl);
-  return drizzle(db, { schema });
-}
-
-export async function closeDatabase() {
-  if (!db) {
-    throw new Error('Database is not open');
-  }
-  await db.end();
-}
 
 export type Database = PostgresJsDatabase<typeof schema>;
 

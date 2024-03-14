@@ -7,6 +7,9 @@ export const tables = schema;
 
 export function useDB() {
   const config = useRuntimeConfig();
+  if (!config.dbUrl) {
+    throw new Error('Missing dbUrl config');
+  }
   const db = postgres(config.dbUrl);
   return drizzle(db, { schema });
 }
