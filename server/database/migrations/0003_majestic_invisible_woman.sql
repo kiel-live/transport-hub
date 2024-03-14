@@ -1,0 +1,1 @@
+ALTER TABLE "gtfs_stop_times" ADD CONSTRAINT "gtfs_stop_times_trip_id_stop_id_stop_sequence_pk" PRIMARY KEY("trip_id","stop_id","stop_sequence");

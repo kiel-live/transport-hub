@@ -1,0 +1,34 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1710332777478,
+      "tag": "0000_ancient_network",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1710404353440,
+      "tag": "0001_nebulous_sphinx",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1710406118988,
+      "tag": "0002_wild_microbe",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1710406826034,
+      "tag": "0003_majestic_invisible_woman",
+      "breakpoints": true
+    }
+  ]
+}
