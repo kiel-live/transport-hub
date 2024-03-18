@@ -1,3 +1,5 @@
+import importFeedTasks from '~/server/tasks/import-feed';
+
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Content-Type', 'text/plain');
   setResponseHeader(event, 'Cache-Control', 'no-cache');
@@ -15,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
       try {
         // await importCatalogTask(log);
-        await runTask('import:feed', { log });
+        await importFeedTasks(log);
       } catch (error) {
         console.error(error);
         controller.enqueue('Error: ' + (error as Error).message + '\n');
