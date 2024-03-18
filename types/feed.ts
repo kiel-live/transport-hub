@@ -4,6 +4,10 @@ export type FeedMeta = {
    */
   mdb_source_id: number;
   /**
+   * The source ID of the feed.
+   */
+  file_name: string;
+  /**
    * The data format that the source uses, e.g gtfs, gtfs-rt.
    */
   data_type: 'gtfs' | 'gtfs-rt';

@@ -24,3 +24,4 @@ logs
 !.env.example
 
 mobility-database-catalogs/
+postgres-data/

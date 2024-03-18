@@ -1,9 +1,6 @@
 export default defineEventHandler(async (event) => {
-  const feeds = await getFeeds();
+  const db = useDB();
+  const feeds = await db.select().from(tables.feeds).limit(10);
 
-  return feeds.map((feed) => ({
-    ...feed,
-    last_fetched: new Date(), // TODO: actually fetch the feed
-    errors: [], // TODO: actually fetch the feed
-  }));
+  return feeds;
 });

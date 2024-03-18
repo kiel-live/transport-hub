@@ -4,7 +4,7 @@ import { gtfsShape } from './shape';
 import { gtfsCalendar } from './calendar';
 import { Model } from '~/importer/types';
 
-export const gtfsTrip = pgTable('trips', {
+export const gtfsTrip = pgTable('gtfs_trips', {
   tripId: text('trip_id').notNull().primaryKey(),
   routeId: text('route_id')
     .notNull()

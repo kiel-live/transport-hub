@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS "gtfs_stops" (
 	"platform_code" text
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "trips" (
+CREATE TABLE IF NOT EXISTS "gtfs_trips" (
 	"trip_id" text PRIMARY KEY NOT NULL,
 	"route_id" text NOT NULL,
 	"service_id" text NOT NULL,
@@ -168,7 +168,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "gtfs_stop_times" ADD CONSTRAINT "gtfs_stop_times_trip_id_trips_trip_id_fk" FOREIGN KEY ("trip_id") REFERENCES "trips"("trip_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "gtfs_stop_times" ADD CONSTRAINT "gtfs_stop_times_trip_id_trips_trip_id_fk" FOREIGN KEY ("trip_id") REFERENCES "gtfs_trips"("trip_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -180,13 +180,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "trips" ADD CONSTRAINT "trips_route_id_gtfs_routes_route_id_fk" FOREIGN KEY ("route_id") REFERENCES "gtfs_routes"("route_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "gtfs_trips" ADD CONSTRAINT "trips_route_id_gtfs_routes_route_id_fk" FOREIGN KEY ("route_id") REFERENCES "gtfs_routes"("route_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "trips" ADD CONSTRAINT "trips_shape_id_gtfs_shapes_shape_id_fk" FOREIGN KEY ("shape_id") REFERENCES "gtfs_shapes"("shape_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "gtfs_trips" ADD CONSTRAINT "trips_shape_id_gtfs_shapes_shape_id_fk" FOREIGN KEY ("shape_id") REFERENCES "gtfs_shapes"("shape_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

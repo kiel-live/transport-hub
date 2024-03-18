@@ -6,37 +6,21 @@
 
     <table class="w-full">
       <tr class="border-b-2 text-left">
-        <th>Country</th>
-        <th>Feeds</th>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Last update</th>
       </tr>
-      <tr v-for="[country, amount] in countryAmounts" :key="country">
+      <tr v-for="feed in feeds" :key="feed.id">
+        <td>{{ feed.type }}</td>
         <td>
-          <nuxt-link :to="`/feeds/${country}`" class="underline">{{ country }}</nuxt-link>
+          <nuxt-link :to="`/feeds/${feed.id}`" class="underline">{{ feed.name }}</nuxt-link>
         </td>
-        <td>{{ amount }}</td>
+        <td>{{ feed.lastUpdated ? new Date(feed.lastUpdated) : '---' }}</td>
       </tr>
     </table>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { FeedMeta } from '~/types/feed';
-
 const { data: feeds } = await useFetch(`/api/feeds`);
-
-function getAmounts<T extends Object>(items: T[], getAmountKey: (item: T) => string) {
-  let amounts = items.reduce((acc, item) => {
-    const key = getAmountKey(item);
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  const amountsArray = Object.entries(amounts);
-  amountsArray.sort((a, b) => b[1] - a[1]);
-  return amountsArray;
-}
-
-const countryAmounts = computed(() => {
-  const filteredFeeds = (feeds.value || []) as FeedMeta[];
-  return getAmounts(filteredFeeds, (i) => i.location?.country_code || 'unknown');
-});
 </script>
