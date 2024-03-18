@@ -7,7 +7,7 @@
       <div class="flex gap-4">
         <nuxt-link to="/map" class="hover:underline">Map</nuxt-link>
         <nuxt-link to="/feeds" class="hover:underline">Feeds</nuxt-link>
-        <nuxt-link to="https://github.com/anbraten/transport-hub" target="_blank" class="hover:underline"
+        <nuxt-link to="https://github.com/kiel-live/transport-hub" target="_blank" class="hover:underline"
           >Source</nuxt-link
         >
       </div>
