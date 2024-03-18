@@ -49,6 +49,9 @@ export class GtfsImporter extends BasicImporter {
   async run(feed: Feed) {
     const gtfsUrl = feed.url;
     const base = path.join(process.cwd(), 'catalogs', 'downloaded'); // TODO: extract somewhere
+
+    await fs.mkdir(base, { recursive: true });
+
     const gtfsFilename = path.join(base, `${feed.name}.zip`);
 
     if (gtfsUrl) {

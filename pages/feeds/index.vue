@@ -15,7 +15,7 @@
         <td>
           <nuxt-link :to="`/feeds/${feed.id}`" class="underline">{{ feed.name }}</nuxt-link>
         </td>
-        <td>{{ feed.lastUpdated ? new Date(feed.lastUpdated) : '---' }}</td>
+        <td>{{ feed.lastUpdated ? formatDateTime(feed.lastUpdated) : '---' }}</td>
       </tr>
     </table>
   </div>

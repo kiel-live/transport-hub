@@ -1,14 +1,23 @@
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq, isNull } from 'drizzle-orm';
 import { importFeed } from '~/importer';
 
 export default defineBatchTask(async ({ log }) => {
   const db = useDB();
-  const feeds = await db
+
+  let feeds = await db
     .select()
     .from(tables.feeds)
-    .where(eq(tables.feeds.disabled, false))
-    .orderBy(asc(tables.feeds.lastUpdated))
+    .where(and(eq(tables.feeds.disabled, false), isNull(tables.feeds.lastUpdated)))
     .limit(1);
+
+  if (feeds.length === 0) {
+    feeds = await db
+      .select()
+      .from(tables.feeds)
+      .where(eq(tables.feeds.disabled, false))
+      .orderBy(asc(tables.feeds.lastUpdated))
+      .limit(1);
+  }
 
   if (feeds.length === 0) {
     log('No feeds to update');
@@ -25,18 +34,21 @@ export default defineBatchTask(async ({ log }) => {
       log(...args);
       logs.push(args.join(' ').trim());
     });
-    await db.update(tables.feeds).set({ lastUpdated: new Date() }).where(eq(tables.feeds.id, feed.id));
+    log(`Finished updating feed ${feed.importId}`);
   } catch (error) {
     log(`Error updating feed ${feed.importId}: ${(error as Error).message}`);
     logs.push((error as Error).message);
   }
 
-  log(`Finished updating feed ${feed.importId}`);
-
-  await db.insert(tables.feedLogs).values({
-    feedId: feed.id,
-    task: 'importFeed',
-    logs: [],
-    createdAt: new Date(),
-  });
+  try {
+    await db.update(tables.feeds).set({ lastUpdated: new Date() }).where(eq(tables.feeds.id, feed.id));
+    await db.insert(tables.feedLogs).values({
+      feedId: feed.id,
+      task: 'importFeed',
+      logs,
+      createdAt: new Date(),
+    });
+  } catch (error) {
+    log(`Error updating feed ${feed.importId}: ${(error as Error).message}`);
+  }
 });
