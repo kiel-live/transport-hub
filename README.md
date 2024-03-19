@@ -5,3 +5,9 @@ The goal of this project is to have a database combining different public transp
 # Roadmap
 
 You can find the roadmap here #1.
+
+## Similar & related projects
+
+- [gtfs-hub](https://github.com/mfdz/gtfs-hub) (https://gtfs.mfdz.de/)
+- [transitous](https://github.com/public-transport/transitous/)
+- [Transitland](https://www.transit.land/)
